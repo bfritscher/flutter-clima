@@ -1,30 +1,31 @@
+
 import 'package:clima/services/location.dart';
 import 'package:clima/services/networking.dart';
+import 'package:flutter/foundation.dart';
 
-const apiKey = 'e72ca729af228beabd5d20e3b7749713';
+const apiKey = '1a7b2916978eec3c1554dc2677ad4ecb';
 const openWeatherMapURL = 'https://api.openweathermap.org/data/2.5/weather';
 
-class WeatherModel {
-  Future<dynamic> getCityWeather(String cityName) async {
-    NetworkHelper networkHelper = NetworkHelper(
-        '$openWeatherMapURL?q=$cityName&appid=$apiKey&units=metric');
+class WeatherData {
 
-    var weatherData = await networkHelper.getData();
-    return weatherData;
+  final int temperature;
+  final int condition;
+  final String cityName;
+
+  const WeatherData({this.temperature = 0, this.condition = 999,  this.cityName = ''});
+
+  factory WeatherData.fromJson(Map<String, dynamic>? json) {
+    if (json == null) {
+      return const WeatherData();
+    }
+    return WeatherData(
+      temperature: json['main']['temp'].round(),
+      condition: json['weather'][0]['id'],
+      cityName: json['name'],
+    );
   }
 
-  Future<dynamic> getLocationWeather() async {
-    Location location = Location();
-    await location.getCurrentLocation();
-
-    NetworkHelper networkHelper = NetworkHelper(
-        '$openWeatherMapURL?lat=${location.latitude}&lon=${location.longitude}&appid=$apiKey&units=metric');
-
-    var weatherData = await networkHelper.getData();
-    return weatherData;
-  }
-
-  String getWeatherIcon(int condition) {
+  String get icon {
     if (condition < 300) {
       return '🌩';
     } else if (condition < 400) {
@@ -44,15 +45,33 @@ class WeatherModel {
     }
   }
 
-  String getMessage(int temp) {
-    if (temp > 25) {
+  String get message {
+    if (cityName== '') {
+      return 'Unable to get weather data';
+    }
+    if (temperature > 25) {
       return 'It\'s 🍦 time';
-    } else if (temp > 20) {
+    } else if (temperature > 20) {
       return 'Time for shorts and 👕';
-    } else if (temp < 10) {
+    } else if (temperature < 10) {
       return 'You\'ll need 🧣 and 🧤';
     } else {
       return 'Bring a 🧥 just in case';
     }
+  }
+}
+
+class WeatherModel {
+  static Future<WeatherData> getCityWeather(String cityName) async {
+    var weatherData = await getData('$openWeatherMapURL?q=$cityName&appid=$apiKey&units=metric');
+     // Use the compute function to run parsing in a separate isolate.
+    return  WeatherData.fromJson(weatherData);
+  }
+
+  static Future<WeatherData> getLocationWeather() async {
+    Location location = Location();
+    await location.getCurrentLocation();
+    var weatherData = await getData('$openWeatherMapURL?lat=${location.latitude}&lon=${location.longitude}&appid=$apiKey&units=metric');
+    return WeatherData.fromJson(weatherData);
   }
 }
