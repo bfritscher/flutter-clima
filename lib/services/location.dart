@@ -34,7 +34,8 @@ class Location {
           'Location permissions are permanently denied, we cannot request permissions.');
     }
     Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.low);
+        locationSettings:
+            const LocationSettings(accuracy: LocationAccuracy.high));
     latitude = position.latitude;
     longitude = position.longitude;
     return position;

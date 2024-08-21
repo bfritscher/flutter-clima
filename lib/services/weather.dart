@@ -1,18 +1,16 @@
-
 import 'package:clima/services/location.dart';
 import 'package:clima/services/networking.dart';
-import 'package:flutter/foundation.dart';
 
 const apiKey = '1a7b2916978eec3c1554dc2677ad4ecb';
 const openWeatherMapURL = 'https://api.openweathermap.org/data/2.5/weather';
 
 class WeatherData {
-
   final int temperature;
   final int condition;
   final String cityName;
 
-  const WeatherData({this.temperature = 0, this.condition = 999,  this.cityName = ''});
+  const WeatherData(
+      {this.temperature = 0, this.condition = 999, this.cityName = ''});
 
   factory WeatherData.fromJson(Map<String, dynamic>? json) {
     if (json == null) {
@@ -46,7 +44,7 @@ class WeatherData {
   }
 
   String get message {
-    if (cityName== '') {
+    if (cityName == '') {
       return 'Unable to get weather data';
     }
     if (temperature > 25) {
@@ -63,15 +61,17 @@ class WeatherData {
 
 class WeatherModel {
   static Future<WeatherData> getCityWeather(String cityName) async {
-    var weatherData = await getData('$openWeatherMapURL?q=$cityName&appid=$apiKey&units=metric');
-     // Use the compute function to run parsing in a separate isolate.
-    return  WeatherData.fromJson(weatherData);
+    var weatherData = await getData(
+        '$openWeatherMapURL?q=$cityName&appid=$apiKey&units=metric');
+    // Use the compute function to run parsing in a separate isolate.
+    return WeatherData.fromJson(weatherData);
   }
 
   static Future<WeatherData> getLocationWeather() async {
     Location location = Location();
     await location.getCurrentLocation();
-    var weatherData = await getData('$openWeatherMapURL?lat=${location.latitude}&lon=${location.longitude}&appid=$apiKey&units=metric');
+    var weatherData = await getData(
+        '$openWeatherMapURL?lat=${location.latitude}&lon=${location.longitude}&appid=$apiKey&units=metric');
     return WeatherData.fromJson(weatherData);
   }
 }

@@ -14,6 +14,7 @@ class LocationScreen extends StatefulWidget {
 
 class _LocationScreenState extends State<LocationScreen> {
   late WeatherData weatherData;
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -44,9 +45,13 @@ class _LocationScreenState extends State<LocationScreen> {
                 children: <Widget>[
                   TextButton(
                     onPressed: () async {
+                      setState(() {
+                        isLoading = true;
+                      });
                       final result = await WeatherModel.getLocationWeather();
                       setState(() {
                         weatherData = result;
+                        isLoading = false;
                       });
                     },
                     child: const Icon(
@@ -65,10 +70,10 @@ class _LocationScreenState extends State<LocationScreen> {
                         ),
                       );
                       if (typedName != null && typedName != '') {
-                        final result = await WeatherModel.getCityWeather(typedName);
+                        final result =
+                            await WeatherModel.getCityWeather(typedName);
                         setState(() {
                           weatherData = result;
-                              
                         });
                       }
                     },
@@ -79,29 +84,37 @@ class _LocationScreenState extends State<LocationScreen> {
                   ),
                 ],
               ),
-              Padding(
-                padding: const EdgeInsets.only(left: 15.0),
-                child: Row(
-                  children: <Widget>[
-                    Text(
-                      '${weatherData.temperature}°',
-                      style: kTempTextStyle,
-                    ),
-                    Text(
-                      weatherData.icon,
-                      style: kConditionTextStyle,
-                    ),
-                  ],
+              if (!isLoading)
+                Padding(
+                  padding: const EdgeInsets.only(left: 15.0),
+                  child: Row(
+                    children: <Widget>[
+                      Text(
+                        '${weatherData.temperature}°',
+                        style: kTempTextStyle,
+                      ),
+                      Text(
+                        weatherData.icon,
+                        style: kConditionTextStyle,
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(right: 15.0),
-                child: Text(
-                  '${weatherData.message} in ${weatherData.cityName}',
-                  textAlign: TextAlign.right,
-                  style: kMessageTextStyle,
+              if (!isLoading)
+                Padding(
+                  padding: const EdgeInsets.only(right: 15.0),
+                  child: Text(
+                    '${weatherData.message} in ${weatherData.cityName}',
+                    textAlign: TextAlign.right,
+                    style: kMessageTextStyle,
+                  ),
                 ),
-              ),
+              if (isLoading)
+                const Expanded(
+                  child: Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                ),
             ],
           ),
         ),
